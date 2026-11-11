@@ -7,6 +7,12 @@
 
 这个仓不存包。没有上传、没有 zip、没有代理：每次下载都离开本站，去作者已经发布的 Release。
 
+## 线上
+
+站点在 <https://liberalluz.github.io/lethebar-marketplace/>。推到 `main` 后，它按
+`.github/workflows/deploy.yml` 里钉住的 `REGISTRY_REF` 构建，把 `site/dist` 部署到 Pages；
+线上字节与构建字节不一致时，流程会失败。
+
 ## 构建
 
 ```text
