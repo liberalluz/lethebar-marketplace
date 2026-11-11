@@ -30,3 +30,5 @@
 .nebula/
 .nebula-skills.json
 # END NEBULA MANAGED
+.batch/
+.idea/
