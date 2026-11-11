@@ -1,6 +1,7 @@
 import { mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { parseIndex } from "./registry.js";
+import { readReviews } from "./liveness.js";
 import { packagePath, renderIndex, renderPackage } from "./pages.js";
 
 function fail(message: string): never {
@@ -23,13 +24,16 @@ try {
 }
 
 const index = parseIndex(text, indexPath);
+const live = readReviews(registryDir);
 const dist = join(here, "dist");
 rmSync(dist, { recursive: true, force: true });
 mkdirSync(dist, { recursive: true });
-writeFileSync(join(dist, "index.html"), renderIndex(index));
+writeFileSync(join(dist, "index.html"), renderIndex(index, live));
 for (const pack of index.packages) {
   const target = join(dist, packagePath(pack));
   mkdirSync(dirname(target), { recursive: true });
-  writeFileSync(target, renderPackage(pack));
+  writeFileSync(target, renderPackage(pack, live));
 }
-console.log(`built ${index.packages.length} record(s) from ${indexPath}`);
+console.log(
+  `built ${index.packages.length} record(s) from ${indexPath}; newest review ${live.newest || "none"}`,
+);

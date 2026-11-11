@@ -10,6 +10,11 @@ registry out at the full commit named in `REGISTRY_REF`, builds `site/dist`,
 uploads it as the Pages artifact, and a verify job compares the sha256 of the
 served index with the one the build named.
 
+A withdrawn record stays on the list, labelled, and its page loses the download
+link: a save can still name that version. A record whose review note is older
+than six months (relative to the newest note in the registry) is labelled
+`not checked since <date>`; a record with no note is `unreviewed`.
+
 Until then the upstream contract is the registry's:
 
 - `lethebar-marketplace-registry/docs/specs/controlled/SRS.md` — what a record promises;

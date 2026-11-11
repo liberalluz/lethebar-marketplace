@@ -3,6 +3,7 @@ import { test } from "node:test";
 import { parseIndex } from "../dist/registry.js";
 import { group, renderIndex, renderPackage } from "../dist/pages.js";
 import { descriptorUrl, releaseUrl } from "../dist/links.js";
+import { staleLabel } from "../dist/liveness.js";
 
 const base = {
   namespace: "liberalluz",
@@ -45,12 +46,18 @@ test("a missing field names the record and the field", () => {
   );
 });
 
-test("withdrawn records leave the list and Other is last", () => {
+test("a withdrawn record stays, after the published ones", () => {
   const index = parseIndex(
     indexOf(
       { ...base, id: "sanguo", version: "1.0.0", collection: "three-kingdoms" },
+      {
+        ...base,
+        id: "gone",
+        version: "0.1.0",
+        collection: "three-kingdoms",
+        status: "withdrawn",
+      },
       { ...base, id: "loose", version: "0.1.0" },
-      { ...base, id: "gone", version: "0.1.0", status: "withdrawn" },
     ),
   );
   const groups = group(index.packages);
@@ -59,9 +66,12 @@ test("withdrawn records leave the list and Other is last", () => {
     ["three-kingdoms", "Other"],
   );
   assert.deepEqual(
-    groups.flatMap((g) => g.packs.map((p) => p.id)),
-    ["sanguo", "loose"],
+    groups[0].packs.map((p) => p.id),
+    ["sanguo", "gone"],
   );
+  const list = renderIndex(index);
+  assert.match(list, /gone/);
+  assert.match(list, /class="status">withdrawn/);
 });
 
 test("a download link goes to the author's release, tag and all", () => {
@@ -83,17 +93,33 @@ test("a download link goes to the author's release, tag and all", () => {
   );
 });
 
-test("the pages carry the record", () => {
+test("a withdrawn page keeps its facts and loses its download", () => {
   const index = parseIndex(
     indexOf(
       { ...base, id: "sanguo", version: "1.0.0", collection: "three-kingdoms" },
       { ...base, id: "gone", version: "0.1.0", status: "withdrawn" },
     ),
   );
-  const list = renderIndex(index);
-  assert.match(list, /three-kingdoms/);
-  assert.match(list, /p\/liberalluz\/sanguo\/1\.0\.0\.html/);
-  assert.doesNotMatch(list, /gone/);
-  const page = renderPackage(index.packages[1]);
-  assert.match(page, /Withdrawn/);
+  const withdrawnPage = renderPackage(index.packages[1]);
+  assert.match(withdrawnPage, /Withdrawn/);
+  assert.match(withdrawnPage, /No download/);
+  assert.doesNotMatch(withdrawnPage, /releases\/download/);
+  const publishedPage = renderPackage(index.packages[0]);
+  assert.match(publishedPage, /releases\/download/);
+});
+
+test("a note older than six months is stale, a missing note is unreviewed", () => {
+  const live = {
+    newest: "2026-11-01",
+    reviewed: new Map([
+      ["liberalluz/fresh/1.0.0", "2026-10-01"],
+      ["liberalluz/old/1.0.0", "2025-01-01"],
+    ]),
+  };
+  assert.equal(staleLabel(live, "liberalluz", "fresh", "1.0.0"), "");
+  assert.equal(
+    staleLabel(live, "liberalluz", "old", "1.0.0"),
+    "not checked since 2025-01-01",
+  );
+  assert.equal(staleLabel(live, "liberalluz", "none", "1.0.0"), "unreviewed");
 });
