@@ -1,0 +1,95 @@
+name: deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+env:
+  REGISTRY_REPOSITORY: liberalluz/lethebar-marketplace-registry
+  REGISTRY_REF: 12da95cbdd79c155e5658622433a16922c0897e2
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check the pin
+        run: |
+          if ! printf '%s' "$REGISTRY_REF" | grep -Eq '^[0-9a-f]{40}$'; then
+            echo "REGISTRY_REF must be a full 40-character commit sha, got '$REGISTRY_REF'" >&2
+            exit 1
+          fi
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: ${{ env.REGISTRY_REPOSITORY }}
+          ref: ${{ env.REGISTRY_REF }}
+          path: registry
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: site/package-lock.json
+      - run: npm ci --prefix site
+      - name: Build
+        run: npm --prefix site run build
+        env:
+          REGISTRY_DIR: ${{ github.workspace }}/registry
+      - name: Name the bytes
+        run: |
+          sha256sum site/dist/index.html | tee build.sha256
+          echo "### Built index" >> "$GITHUB_STEP_SUMMARY"
+          cat build.sha256 >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: site/dist
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site/dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    outputs:
+      page_url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
+
+  verify:
+    needs: [build, deploy]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist
+      - name: Compare the served bytes
+        env:
+          PAGE_URL: ${{ needs.deploy.outputs.page_url }}
+        run: |
+          want=$(sha256sum dist/index.html | cut -d' ' -f1)
+          for i in $(seq 1 12); do
+            got=$(curl -fsSL "$PAGE_URL" | sha256sum | cut -d' ' -f1 || true)
+            if [ "$got" = "$want" ]; then
+              echo "served $got"
+              exit 0
+            fi
+            echo "attempt $i: served ${got:-nothing}, waiting for Pages"
+            sleep 10
+          done
+          echo "the served bytes never matched the build ($want)" >&2
+          exit 1

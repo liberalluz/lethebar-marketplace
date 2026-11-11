@@ -9,6 +9,13 @@ points at the author's release.
 This repository never stores a package. There is no upload, no zip, and no proxy:
 every download leaves for the release the author already published.
 
+## Live
+
+The site is at <https://liberalluz.github.io/lethebar-marketplace/>. A push to
+`main` builds it from the registry commit named in `.github/workflows/deploy.yml`
+(`REGISTRY_REF`), deploys `site/dist` to Pages, and fails when the bytes served
+are not the bytes built.
+
 ## Build
 
 ```text
