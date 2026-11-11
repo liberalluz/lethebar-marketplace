@@ -2,23 +2,37 @@
 
 English · [简体中文](README.zh-CN.md)
 
-web project, initialized with Nebula.
+The site that lists what the `lethebar-marketplace-registry` index holds: a list
+grouped by collection, one page per package version, and a download link that
+points at the author's release.
+
+This repository never stores a package. There is no upload, no zip, and no proxy:
+every download leaves for the release the author already published.
+
+## Build
+
+```text
+npm --prefix site install
+REGISTRY_DIR=../lethebar-marketplace-registry npm --prefix site run build
+```
+
+The build reads `<REGISTRY_DIR>/index.json` and writes `site/dist/`. The checkout
+is the pin: the same commit produces the same pages.
 
 ## Layout
 
-```text
-  site/
-docs/
-```
-
-## Start
-
-```text
-Read AGENTS.md, then follow the Nebula route.
-```
+| Path | Holds |
+|---|---|
+| `site/` | the build: TypeScript, no framework, no server |
+| `infra/` | the Nebula batch runner and the web stack |
+| `docs/` | this repository's specs and decisions |
 
 ## Docs
 
-- `docs/README.md`
-- `docs/specs/`
-- `docs/decisions/`
+- the registry contract: `lethebar-marketplace-registry/docs/specs/controlled/`
+- the engine and the pack guide: `lethebar/docs/guide/`
+- this repository's plan and records: `lethebar-marketplace-docs`
+
+## Licence
+
+Apache-2.0. See `LICENSE`.

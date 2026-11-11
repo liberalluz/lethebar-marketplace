@@ -3,16 +3,18 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && node dist/main.js",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint src",
+    "lint": "eslint src test",
     "format": "prettier --check .",
-    "test": "node --test"
+    "test": "tsc && node --test test/pages.test.js"
   },
   "devDependencies": {
+    "@eslint/js": "^9.14.0",
     "@types/node": "^22.0.0",
-    "eslint": "^9.0.0",
+    "eslint": "^9.14.0",
     "prettier": "^3.3.0",
-    "typescript": "^5.6.0"
+    "typescript": "^5.6.0",
+    "typescript-eslint": "^8.14.0"
   }
 }

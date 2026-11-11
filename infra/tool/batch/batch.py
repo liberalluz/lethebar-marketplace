@@ -1072,8 +1072,9 @@ def run_checks(
         except ValueError:
             raise SystemExit(f"check {name}: cwd escapes project root: {raw_cwd}")
         try:
+            resolved = [shutil.which(command[0]) or command[0], *command[1:]]
             proc = subprocess.run(
-                command,
+                resolved,
                 cwd=check_cwd,
                 capture_output=True,
                 text=True,
