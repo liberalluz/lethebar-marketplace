@@ -1,7 +1,7 @@
 {
   "base": "main",
   "branch_prefix": "batch/",
-  "docs_root": "",
+  "docs_root": "../lethebar-marketplace-docs",
   "scope": {
     "ignore": [
       "site/node_modules/**",
