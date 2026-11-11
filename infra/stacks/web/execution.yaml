@@ -1,0 +1,12 @@
+workdir: site
+checks:
+  - format=npm run format -- --check
+  - lint=npm run lint
+  - typecheck=npm run typecheck
+  - build=npm run build
+  - test=npm test
+generated:
+  - "site/dist/**"
+ignore:
+  - "site/node_modules/**"
+  - "site/dist/**"

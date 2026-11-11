@@ -1,0 +1,18 @@
+id: web
+name: Static web (TypeScript)
+version: 1
+language: TypeScript
+directories:
+  - site
+platforms:
+  - browser
+toolchain:
+  node: "22"
+  typescript: "5"
+commands:
+  build: "npm --prefix site run build"
+  test: "npm --prefix site test"
+  lint: "npm --prefix site run lint"
+  typecheck: "npm --prefix site run typecheck"
+checks:
+  - site-checks

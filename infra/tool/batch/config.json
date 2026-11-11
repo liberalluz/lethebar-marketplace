@@ -1,0 +1,71 @@
+{
+  "base": "main",
+  "branch_prefix": "batch/",
+  "docs_root": "",
+  "scope": {
+    "ignore": [
+      "site/node_modules/**",
+      "site/dist/**"
+    ],
+    "generated": [
+      "site/dist/**"
+    ]
+  },
+  "commit": {
+    "types": [],
+    "scopes": [],
+    "body": []
+  },
+  "checks": [
+    {
+      "name": "format",
+      "command": [
+        "npm",
+        "run",
+        "format",
+        "--",
+        "--check"
+      ],
+      "cwd": "site"
+    },
+    {
+      "name": "lint",
+      "command": [
+        "npm",
+        "run",
+        "lint"
+      ],
+      "cwd": "site"
+    },
+    {
+      "name": "typecheck",
+      "command": [
+        "npm",
+        "run",
+        "typecheck"
+      ],
+      "cwd": "site"
+    },
+    {
+      "name": "build",
+      "command": [
+        "npm",
+        "run",
+        "build"
+      ],
+      "cwd": "site"
+    },
+    {
+      "name": "test",
+      "command": [
+        "npm",
+        "test"
+      ],
+      "cwd": "site"
+    }
+  ],
+  "release_checks": [],
+  "pr_create": [],
+  "translate": [],
+  "merge": []
+}
